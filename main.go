@@ -122,9 +122,9 @@ func SVG(mm MeshSnapshot) string {
 	s.End()
 
 	b, err := os.ReadFile("agents_svg_file.svg") // just pass the file name
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 	return string(b)
 }
 
