@@ -21,7 +21,7 @@ var globalmm MeshSnapshot
 func main() {
 	assignValues() // NOTE this assign its a test example the func should be removed in order to receive param when used as external package
 	fmt.Println(UTF8(globalmm))
-	fmt.Println(SVG(globalmm))
+	// fmt.Println(SVG(globalmm))
 }
 
 func assignValues() {
@@ -45,7 +45,8 @@ func assignValues() {
 		agent03uuid: agent03name,
 		agent04uuid: agent04name,
 		agent05uuid: agent05name,
-		agent06uuid: agent06name}
+		agent06uuid: agent06name,
+	}
 
 	globalmm.Agents = map[uuid.UUID]string{
 		agent01uuid: "online",
@@ -53,7 +54,8 @@ func assignValues() {
 		agent03uuid: "degraded",
 		agent04uuid: "online",
 		agent05uuid: "online",
-		agent06uuid: "offline"}
+		agent06uuid: "offline",
+	}
 
 	globalmm.Connections = map[uuid.UUID][]uuid.UUID{
 		agent01uuid: {agent02uuid, agent03uuid},
@@ -62,6 +64,15 @@ func assignValues() {
 		agent04uuid: {agent06uuid},
 		agent05uuid: {},
 		agent06uuid: {agent04uuid},
+	}
+
+	globalmm.AgentVersions = map[uuid.UUID]string{
+		agent01uuid: "c1b95fd3",
+		agent02uuid: "c1b95fd3",
+		agent03uuid: "c1b95fd3",
+		agent04uuid: "797eb564",
+		agent05uuid: "797eb564",
+		agent06uuid: "db796320",
 	}
 }
 
@@ -75,24 +86,35 @@ type MeshSnapshot struct {
 
 	// mapping of an agent and its connections to other agents
 	Connections map[uuid.UUID][]uuid.UUID
+
+	// mapping of the agent id to a chart version
+	AgentVersions map[uuid.UUID]string
 }
 
 // Returns a simple UTF8 representation of the mesh map
 func UTF8(mm MeshSnapshot) string {
 	output := ""
+	agentConnections := false
 	for id, name := range mm.AgentNames {
 		for id2, status := range mm.Agents {
-			if id == id2 {
-				output += "---------------------------------------------\n"
-				output += fmt.Sprintf("Agent Name:\n\t%s (%s)\nAgent ID:\n\t%s\n", name, status, id)
-				for id3, connections := range mm.Connections {
-					if id2 == id3 {
-						output += "Agent Connections:\n"
-						for _, conn := range connections {
-							for id4, name2 := range mm.AgentNames {
-								if conn == id4 {
-									output += fmt.Sprintf("\t%s\n", name2)
+			for id3, version := range mm.AgentVersions {
+				if id == id2 && id2 == id3 {
+					output += "---------------------------------------------\n"
+					output += fmt.Sprintf("Agent Name:\n\t%s (%s)\nAgent Version:\n\t%s\nAgent ID:\n\t%s\n", name, status, version, id)
+					for id3, connections := range mm.Connections {
+						if id2 == id3 {
+							output += "Agent Connections:\n"
+							agentConnections = false
+							for _, conn := range connections {
+								for id4, name2 := range mm.AgentNames {
+									if conn == id4 {
+										agentConnections = true
+										output += fmt.Sprintf("\t%s\n", name2)
+									}
 								}
+							}
+							if !agentConnections {
+								output += "\tNo Connections\n"
 							}
 						}
 					}
