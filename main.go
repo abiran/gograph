@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"math"
 	"os"
+	"strings"
 
 	"fmt"
 
@@ -123,7 +124,7 @@ func UTF8(mm MeshSnapshot) string {
 		}
 		output += "---------------------------------------------\n\n\n"
 	}
-	return output
+	return strings.TrimSuffix(output, "\n\n\n")
 }
 
 // Returns an SVG string that can be embedded in an HTML file
